@@ -1,0 +1,21 @@
+Round n part_encode-> 0x92d915250119e12b
+Key map -> 
+e0be661032d5
+f0b676f82095
+e4d67623628f
+e6d376363183
+aed373a60167
+af537b46abc2
+af53d9748559
+1f5bd94b944a
+3f49d94897ea
+1f699d1cdc29
+1f2d9d4a5c70
+5f2cad89e938
+dbacaca15e10
+d8aeaed90236
+f0be2e954a8c
+f0bea6112e84
+
+
+	long int plain[] = { 0x92,0xd9,0x15,0x25,0x01,0x19,0xe1,0x2b };

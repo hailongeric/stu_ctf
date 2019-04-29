@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<!-- saved from url=(0285)https://sh-preview-ftn.weiyun.com:8443/ftn_doc_previewer/compress_file_previewer.html?rkey=4c9beea4095b77f1a311245cd5d7526345ea680af7ad715afa4ae24e0480d2a538b5f35e31052b36f471d8c7e1f43806d449529c841cd65734eff3cda5e2e830&filename=puzzles_4bd8ba4b08cf59d558f6b366d44e222e.zip&filetype=13 -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style id="stndz-style"></style>
+    
+    <title>压缩包文件预览</title>
+    <style>
+        .item:hover {border-color:#C8E7F7; background-color:#DFF4FF;}
+    </style>
+    <script type="text/javascript">
+        var start_time = new Date();
+    </script>
+    <link rel="stylesheet" type="text/css" href="./base.css">
+    <link rel="stylesheet" type="text/css" href="./base-delay.css">
+    <link rel="stylesheet" type="text/css" href="./p-web.css">
+    <link rel="stylesheet" type="text/css" href="./p-web-delay.css">
+    <link rel="stylesheet" type="text/css" href="./p-web-zip-preview.css">
+</head>
+<body class="web-app" style="overflow:hidden">
+<div class="full-mask"></div>
+<div class="pop-zip-preview-wrapper" style="" id="preview-wrapper">
+    <div class="full-pop-header">
+        <ul class="nav" id="curPaths">
+        <li class="item current" style="z-index: 1100;">puzzles_4b..</li></ul>
+    </div>
+    <div class="body" id="container">
+        <!-- 下载中 -->
+        <div class="tips-process" id="loading-process" style="display: none;">
+            <p class="process-bg">
+                <!-- 更新width的百分比控制进度条 -->
+                <span class="process-bar" style="width: 100%;" id="loading-bar"></span>
+            </p>
+            <p class="tips-text">已加载<span id="loading-text">100</span>%</p>
+        </div>
+        <ul class="zip-content ui-thumbview clearfix" id="fileList">
+        <li class="item"><i class="filetype icon-html"></i><p class="filename">Welcome.html</p></li></ul>
+    </div>
+</div>
+<script>
+    //接口页本身定义的错误
+    var LOCALERROR = {
+        RENDERERR: {
+            code: 1000, //默认错误类型
+            msg: '文件预览失败，请稍后重试。'
+        },
+        NETERR: {
+            code: 1001, //网络错误，超时or请求失败
+            msg: '网络错误，请稍后重试。'
+        },
+        PARSEERR: {
+            code: 1002, //解析SVR返回的内容失败
+            msg: '解析压缩包数据失败，请稍后重试。'
+        },
+        PASSWORDERROR: {
+            code: 1003,
+            msg: '压缩包文件有密码，不支持预览'
+        }
+    }
+    var html_escapes = {
+        '&': "&amp;",
+        '<': "&lt;",
+        '>': "&gt;",
+        "'": "&#39;",
+        '"': "&quot;",
+        '/': '&#x2F;'
+    };
+
+    //定义一些常量
+    var CONST = {
+        startLoading: 1,   //下载进度条开始的进度
+        endLoading: 99,    //下载进度条不能大于99%
+        zIndex: 1100,      //文件路径的path初始z-index
+        fold: 3,           //文件路径倒数第3个开始折叠
+        maxPathLength: 10, //目录名最大不能超过10字符
+        APPBOX: {          //appbox下的样式
+            marginTop: -252,
+            height: 400,
+            zoom: 0.8,
+            fontSize: 15,
+            top: 250,
+            failTipsTop: '30%'
+        }
+    }
+
+    // 要转义的HTML字符
+    var re_html_escape = /[&<>'"]/g;
+
+    function init(json) {
+        server.init({
+            pageUrl: location.protocol + '//' + json.domain + ':' + json.port + '/ftn_compress_list/',
+            subDirUrl: location.protocol + '//' + json.domain + ':' + json.port + '/ftn_doc_previewer/compress_file_previewer.html?rkey=' + json.downloadkey +
+            '&filetype=' + json.fileType+ '&filename=' + json.fileName + '&filesize=' + json.fileSize + '&domain='+json.domain+'&port='+json.port,
+            downloadUrl: location.protocol + '//' + json.domain + ':' + json.port + '/ftn_compress_getfile/',
+            fileType: json.fileType,
+            rkey: json.downloadkey,
+            fileSize: json.fileSize,
+            fileName: json.fileName,
+            isAppbox: json.isAppbox,
+            curPath: json.curPath || '/'
+        });
+
+        //appbox下需要重新调整预览窗口大小
+        if(server.isAppbox){
+            ui.adjust();
+        }
+        ui.loading(CONST.startLoading);
+
+        if(json.cookie) {
+            document.cookie = 'FTN5K=' + encodeURIComponent(json.cookie) + ';domain=' + json.domain + ';path=/'; //防盗链
+        }
+
+        if(server.isRequesting || server.hasLoaded || server.isRetrying || ui.isRendering) {
+            return;
+        }
+        server.showFileList();
+    };
+
+
+    var server = {
+        init: function(cfg) {
+            this.pageUrl = cfg.pageUrl;
+            this.subDirUrl = cfg.subDirUrl;
+            this.downloadUrl = cfg.downloadUrl;
+            this.rkey = cfg.rkey;
+            this.fileType = cfg.fileType;
+            this.fileName = cfg.fileName || '';
+            this.fileSize = cfg.fileSize || 0;
+            this.curPath = cfg.curPath;
+            this.isAppbox = parseInt(cfg.isAppbox) || 0;
+            this.hasLoaded = false;
+            this.isFirstLoad = true;
+            this.tryTimes = 0;
+            this.reporter = new Reporter();
+        },
+        showFileList: function() {
+            this.hasLoaded = false;
+            this.isRequesting = true;
+            var me = this;
+            request({
+                url: this.pageUrl,
+                data: {
+                    rkey: this.rkey,
+                    filetype: this.fileType,
+                    path: this.curPath
+                },
+                success: function(rspData) {
+                    me.isRequesting = false;
+                    me.isRetrying = false;
+                    me.tryTimes = 0;
+                    setTimeout(function() {
+                        me.hasLoaded = true;
+                        ui.render(rspData);
+                    }, 500);
+                },
+                error: function(rspData) {
+                    me.isRequesting = false;
+                    me.isRetrying = false;
+                    if(me.isTryByCode(rspData.code)) {
+                        me.tryTimes++;
+                        me.isRetrying = true;
+                        setTimeout(function() {
+                            me.showFileList();
+                        }, 3*1000);
+                    }
+                    me.reporter.reportMD(179000125, rspData.code, 1);
+                    me.reporter.reportLP(rspData);
+                    if(me.isFirstLoad && !me.isRetrying) {
+                        var msg = me.getErrorType(rspData.code);
+                        msg = msg.replace('重试', '<a style="color: #3091f2;text-decoration: none;outline: none;" href="#" id="retry">重试</a>');
+                        ui.onRenderError(msg);
+//                        reporter.reportCGI(rspData.code, (+new Date()) - start_time);
+                    }
+                }
+            })
+        },
+        downloadFile: function(fileName) {
+            var path = this.curPath === '/'? this.curPath + fileName : this.curPath + '/' + fileName,
+                url = this.downloadUrl + 'rkey=' + this.rkey + '&filetype=' + this.fileType + '&path=' + encodeURIComponent(path) + '&';
+
+            this.reporter.pushUserLog({
+                'download_file_url': url
+            });
+            location.href = url;
+//            window.open(url);
+        },
+        isTryByCode: function(code) {
+            return (code == -29126 || code == -28126) && this.tryTimes < 3;
+        },
+        getErrorType: function(code) {
+            if(code == -9006) {
+                return LOCALERROR.PASSWORDERROR['msg'];
+            } else if(code == -28124 || code == -9002 || code == -9005 || code == -9015 || code == 1002){
+                return LOCALERROR.PARSEERR['msg'];
+            } else if(code == 408 || code == 504 || code == 1001) {
+                return LOCALERROR.NETERR['msg'];
+            }
+            return LOCALERROR.RENDERERR['msg'];
+        }
+    }
+
+    var ui = {
+        preview_wrapper: $('preview-wrapper'),
+        container: $('container'),
+        fileList: $('fileList'),
+        curPaths: $('curPaths'),
+        loadingTips: $('loading-process'),
+        loadingBar: $('loading-bar'),
+        loadingText: $('loading-text'),
+        isLoading: false,
+        isFold: false, //是否折叠文件路径
+        pathItemList: [], //目录名称列表，切换目录的时候更新
+        loadingNumber: 1,
+        fileTypeMap: {
+            13: 'zip',
+            14: 'rar',
+            15: '7z'
+        },
+
+        render: function(data) {
+            var dirNodes = data['dirs'] || [],
+                fileNodes = data['files'] || [],
+                $fileList = this.fileList,
+                load_timer,
+                toogle_timer,
+                count = 1,
+                me = this;
+
+            if(server.curPath === '/' && server.isFirstLoad){
+                this.addFirstPath(this.getSingleName(server.fileName));
+            }
+
+            this.loadingTips.style.display = 'none';
+            if(data['dirs'] == null && data['files'] == null){
+                this.clearOut();
+                this.emptyDir();
+                me.isLoading = false;
+                return;
+            }
+
+            dirNodes.forEach(function(dirNode, i) {
+                var dirdiv = document.createElement('li'),
+                    last_item_calss = (count % 6 == 0)? ' last-item' : '';
+
+                dirdiv.className = 'item' + last_item_calss;
+                dirdiv.innerHTML = '<i class="filetype icon-folder"></i><p class="filename">' + text(smart_sub(dirNode,14)) + '</p>';
+                $fileList.appendChild(dirdiv);
+                addEvent(dirdiv, 'click', function (e) {
+                    clearTimeout(load_timer);
+                    toogle_timer = setTimeout(function() {
+                        load_timer = setTimeout(function() {
+                            me.enterSubDir(dirNode);
+                        }, 30);
+                    }, 300)
+                }, false);
+                count++;
+            });
+            //绘制文件
+            fileNodes.forEach(function(fileNode, i) {
+                var filediv = document.createElement('li'),
+                        last_item_calss = (count % 6 == 0)? ' last-item' : '';
+
+                filediv.className = 'item' + last_item_calss;
+                filediv.innerHTML = '<i class="filetype icon-' + get_icon(fileNode.filename) + '"></i><p class="filename">' + text(smart_sub(fileNode.filename,14)) + '</p>';
+                $fileList.appendChild(filediv);
+                addEvent(filediv, 'click', function(e) {
+                    server.downloadFile(fileNode.filename);
+                }, false);
+                count++;
+            });
+
+            if(server.isFirstLoad && server.curPath === '/'){
+                this.report();
+            }
+            me.isLoading = false;
+        },
+
+        adjust: function() {
+            this.loadingTips.style.top = CONST.APPBOX.top + 'px';
+            this.preview_wrapper.style.zoom = CONST.APPBOX.zoom;
+            this.preview_wrapper.style.fontSize = CONST.APPBOX.fontSize + 'px';
+            this.preview_wrapper.style.marginTop = CONST.APPBOX.marginTop + 'px';
+            this.container.style.height = CONST.APPBOX.height + 'px';
+        },
+
+        //删除文件路径，小于z_index的删除
+        deletePath: function(z_index) {
+            var pathList = this.curPaths.children;
+            for(var i=pathList.length; i>0; i--) {
+                var path = pathList[i-1],
+                    cur_index = path.style.zIndex;
+                if(z_index === cur_index) {
+                    path.className = 'item current';
+                    path.onclick = null;
+                    path.innerText = this.htmlEncode(this.pathItemList[this.pathItemList.length-1]);
+                } else if(z_index > cur_index) {
+                    path.parentNode.removeChild(path);
+                    this.pathItemList.pop();
+                }
+            }
+        },
+
+        //显示文件路径，跟目录
+        addFirstPath: function(dirName) {
+            var pathLi = document.createElement('li');
+            pathLi.style.zIndex = CONST.zIndex;
+            pathLi.innerText = this.htmlEncode(dirName);
+            pathLi.className = 'item current';
+            this.curPaths.appendChild(pathLi);
+
+            this.pathItemList.push(dirName);
+        },
+
+        //添加文件路径到末尾
+        addPath: function(dirName, cur_path) {
+            var pathList = this.curPaths.children,
+                last_path = pathList[pathList.length - 1],
+                z_index = last_path.style.zIndex,
+                toogle_timer,
+                load_timer,
+                me = this;
+
+            //更改之前最后一个目录的样式和事件
+            last_path.className = 'item';
+            last_path.onclick =  function() {
+                if(me.isLoading) {
+                    return;
+                } else{
+                    me.isLoading = true;
+                }
+                clearTimeout(load_timer);
+                toogle_timer = setTimeout(function() {
+                    load_timer = setTimeout(function() {
+                        server.curPath = cur_path;
+                        me.clearOut();
+                        me.loading(CONST.startLoading);
+                        me.deletePath(z_index);
+                        server.showFileList();
+                    }, 30);
+                }, 300);
+            };
+
+            //在末尾添加新的目录
+            var pathLi = document.createElement('li');
+            pathLi.style.zIndex = z_index - 1;
+            pathLi.innerText = this.htmlEncode(dirName);
+            pathLi.className = 'item current';
+            this.curPaths.appendChild(pathLi);
+            this.pathItemList.push(dirName);
+
+            this.checkPath();
+        },
+
+        //检查是否需要折叠路径
+        checkPath: function() {
+            var items = this.curPaths.children,
+                len = items.length;
+
+            var item = items[len - 1] || null;
+            if(!this.getChildElementTop(item)) {
+                this.isFold = false;
+            }
+            while(len > 0 && this.getChildElementTop(item)) {
+                if(len > 2){
+                    var preItem = items[len - 3];
+                    if(this.isFold) {
+                        preItem.style.display = 'none';
+                    } else{
+                        preItem.innerText = '...';
+                        this.isFold = true;
+                    }
+                    len--;
+                }
+            }
+        },
+
+        //使用元素与其父元素的offsetTop之差来判断是否溢出
+        getChildElementTop: function(element){
+            var ele = (typeof element == "string") ? document.getElementById(element) : element;
+            if (ele.parentNode === null || ele.style.display == 'none') {
+                return false;
+            }
+            return ele.offsetTop - ele.parentNode.offsetTop;
+        },
+
+        //进入目录
+        enterSubDir: function(dirName) {
+            if(this.isLoading) {
+                return;
+            } else{
+                this.isLoading = true;
+            }
+
+            this.addPath(this.getSingleName(dirName), server.curPath);
+            this.clearOut();
+            this.loading(CONST.startLoading);
+
+            if (server.curPath == '/') {
+                server.curPath = server.curPath + dirName;
+            } else {
+                server.curPath = server.curPath + '/' + dirName;
+            }
+            server.showFileList();
+
+            server.reporter.pushUserLog({
+                'enter_dir_path': server.curPath
+            });
+        },
+
+        //擦除之前显示的文件列表
+        clearOut: function() {
+            var children = this.fileList.children;
+            for(var i=children.length; i>0; i--) {
+                var item = children[i-1];
+                item.parentNode.removeChild(item);
+            }
+            this.loadingBar.style.width =  CONST.startLoading + '%';
+            this.loadingText.innerText = CONST.startLoading;
+            this.loadingNumber = CONST.startLoading;
+        },
+
+        emptyDir: function () {
+            var html = '<div id="_disk_files_empty" class="g-empty sort-folder-empty" style="display: block">' +
+                    '<div class="empty-box"><div class="ico"></div><p class="title">该文件夹为空</p>' +
+                    '</div></div>';
+
+            this.fileList.innerHTML = html;
+        },
+
+        //显示加载进度条
+        loading: function(loading_number) {
+            var me = this;
+            me.loadingTips.style.display = 'block';
+
+            setTimeout(function () {
+                if(server.hasLoaded){
+                    me.loadingBar.style.width =  '100%';
+                    me.loadingText.innerText = 100;
+                    return;
+                }
+
+                // 随机进度
+                me.loadingNumber = loading_number > me.loadingNumber? loading_number: me.loadingNumber;
+                me.loadingNumber += Math.floor(Math.random() * 10);
+
+                // 随机进度不能超过99%，以免页面还没加载完毕，进度已经100%了
+                if(me.loadingNumber > CONST.endLoading){
+                    me.loadingNumber = CONST.endLoading;
+                } else{
+                    me.loading(me.loadingNumber);
+                }
+                me.loadingBar.style.width = me.loadingNumber + '%';
+                me.loadingText.innerText = me.loadingNumber;
+            }, 30);
+        },
+
+        report: function() {
+            server.reporter.reportMD(179000125, 0, 0);
+            server.isFirstLoad = false;
+        },
+
+        //  出错处理
+        onRenderError: function(msg) {
+            this.isLoading = false;
+            if(server.curPath === '/' && !server.tryTimes){
+                this.addFirstPath(this.getSingleName(server.fileName));
+            }
+            this.clearOut();
+            this.loadingTips.style.display = 'none';
+            this.showFailTips(msg);
+            server.hasLoaded = true;
+        },
+
+        showFailTips: function(msg){
+            var failTipsStyle = server.isAppbox? CONST.APPBOX.failTipsTop : '';
+            var html = '<div class="err-oversize clearfix" style="top:' + failTipsStyle + '"><i class="icon icon-err"></i>' +
+                    '<p class="err-text">' + msg + '</p></div>';
+            this.fileList.innerHTML = html;
+            var retry = this.fileList.getElementsByTagName('a')[0];
+            if(retry) {
+                var me = this;
+                addEvent(retry, 'click', function() {
+                    me.clearOut();
+                    me.loading(CONST.startLoading);
+                    server.tryTimes++;
+                    server.isRetrying = true;
+                    server.showFileList();
+                }, false);
+            }
+        },
+
+        getSingleName: function(name) {
+            return name.length > CONST.maxPathLength? name.slice(0, CONST.maxPathLength) + '..' : name;
+        },
+
+        htmlEncode: function(str) {
+            if(!str){
+                return str;
+            }
+            return str.replace(re_html_escape, function (chr) {
+                return html_escapes[chr] || chr;
+            });
+        }
+    }
+
+    var Reporter = function() {
+        var cache = {},
+            last_time,
+            cache_log = [],
+            timer = {},
+            uin = _getCookie('uin') || _getCookie('p_uin') || '4294967295',
+            cgi_url = location.protocol + '//www.weiyun.com/report/md';
+
+        uin = parseInt(uin.replace(/^[oO0]*/, ''));
+        var view_key = 'weiyun_' + uin;
+        var file_type_list = ['', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'rtf', 'pdf', 'BMP', 'JPG', 'PNG', 'GIF', 'zip', 'rar', '7z', 'txt'];
+        var extraLog = [];
+
+        //逻辑失败错误码
+        var logi_error_code = {
+            '403': 1,    //触发防盗链
+            '1001': 1,   //数据解析失败
+            '-9006': 1,   //压缩文件有密码
+            '-28126': 1,  //刚上传文件未转码完成
+            '-28133': 1,  //office文件有密码
+            '-29126': 1   //文档正在转码
+        };
+
+        //记录用户点击的log如进入子目录和下载文件
+        var pushUserLog = function(log) {
+            if(typeof log === 'object') {
+                for(var key in log) {
+                    extraLog.push(' [' + key + '] ' + log[key]);
+                }
+            } else {
+                extraLog.push(log);
+            }
+        }
+        //构造日志内容
+        var _getUserLog = function(errData) {
+            var log = [
+                'preview_url: ' + location.href,
+                'error_code: ' + errData.code,
+                'error_msg: ' + errData.msg,
+                'file_name: ' + server.fileName + ' file_size: ' + server.fileSize + ' fileType:' + file_type_list[server.fileType],
+                'curPath: ' + server.curPath + ' isAppbox: ' + !!server.isAppbox,
+                'hasLoaded: ' + server.hasLoaded + ' isFirstLoad:' + server.isFirstLoad + ' tryTimes:' + server.tryTimes
+            ];
+
+            var user_log = [];
+            user_log.push('【用户日志】');
+            user_log.push('记录时间 ' + (new Date()).Format("yyyy-mm-dd HH:MM:ss"));
+            user_log.push('uin ' + uin);
+            user_log.push('\n【error log】：');
+            for(var key in log) {
+                if(log[key] && log[key].length) {
+                    user_log.push('[log] [previewer] ' + log[key]);
+                }
+            }
+            for(var key in extraLog) {
+                if(extraLog[key] && extraLog[key].length) {
+                    user_log.push('[log] [previewer] ' + extraLog[key]);
+                }
+            }
+            return user_log.join('\n') + '\n';
+        }
+        /**
+         * 操作日志上报罗盘
+         */
+        var reportLP = function(errData) {
+            var user_log = _getUserLog(errData);
+            try {
+                var now = new Date().getTime(),
+                    take_time = last_time ? (now - last_time) / 1000 : 4,
+                    url = location.protocol === 'https:' ? 'https://www.weiyun.com/log/post/' + view_key : 'http://www.weiyun.com/log/post/' + view_key;
+
+                //三秒上报一次, 这里last_time标识上次上报的时间点。
+                if(take_time > 3) {
+                    timer && clearTimeout(timer);
+                    cache_log.push(user_log);
+                    timer = (function(reportUrl) {
+                        setTimeout(function() {
+                            request({
+                                url: reportUrl,
+                                method: 'POST',
+                                data: cache_log.join('\n'),
+                                success: function (rspData) {
+
+                                },
+                                error: function (rspData) {
+
+                                }
+                            });
+                            cache_log = [];
+                        }, 3 * 1000);
+                    })(url);
+                    last_time = now;
+                } else {
+                    cache_log.push(user_log);
+                }
+            } catch(e) {
+            }
+        };
+        /**
+         * 摘自库common/report_md
+         * oz 模调被调上报，注意查询被调而不是主调。
+         * 查询方法：m.isd.com的模调页，选被调查询，微云-微云业务-Web接入业务，填被调id和接口id
+         * @param {String|Number} id 接口id，在模调系统里建的
+         * @param {String|Number} code 调用结果
+         * @param {String|Number} result 0：成功，1:失败，2:逻辑失败
+         */
+        var reportMD = function(id, code, result) {
+            var ext = '';
+            if(id) {
+                if(code != undefined) {
+                    ext += "&code=" + code;
+                }
+                if(result != undefined) {
+                    result = result>0? 2 : 0; //(result && logi_error_code[code])? 2 : result;
+                    ext += "&type=" + result;
+                }
+                //主调和被调ID均写死
+                var url = cgi_url + "?fromId=204971707&toId=277000034&interfaceId=" + id + ext + "&r=" + Math.random();
+                report(url);
+            }
+        };
+
+        var report = function(url) {
+            var img = new Image();
+            img.src = url;
+            img.id = +new Date();
+            img.onload = img.onerror = function() {
+                img.onload = img.onerror = null;
+                delete cache[img.id];
+            }
+            cache[img.id] = img;
+        };
+
+        return {
+            reportMD: reportMD,
+            reportLP: reportLP,
+            pushUserLog: pushUserLog
+        };
+    }
+
+    //##########################util##################################
+    Array.prototype.forEach = Array.prototype.forEach || function(fn) {
+        for(var i= 0, len=this.length; i < len; i++) {
+            fn(this[i],i, this);
+        }
+    };
+    String.prototype.trim = function() {
+        return this.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+    }
+
+    // 对Date的扩展，将 Date 转化为指定格式的String
+    // (new Date()).Format("yyyy-mm-dd HH:MM:ss") ==> 2016-09-02 10:06:23
+    Date.prototype.Format = function (fmt) {
+        var o = {
+            "y+": this.getFullYear(),  //年份
+            "m+": this.getMonth() + 1,  //月份
+            "d+": this.getDate(),       //日
+            "H+": this.getHours(),      //小时
+            "M+": this.getMinutes(),    //分
+            "s+": this.getSeconds(),    //秒
+            "S": this.getMilliseconds() //毫秒
+        };
+        if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+        for (var k in o)
+            if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+        return fmt;
+    }
+
+    //获取cookie
+    var _getCookie = function(name){
+        var cookieValue = '';
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    };
+    function addEvent(oElement, strEvent, fncHandler) {
+        if (oElement.addEventListener) {
+            oElement.addEventListener(strEvent, fncHandler, false);
+        } else if (oElement.attachEvent) {
+            oElement.attachEvent("on" + strEvent, fncHandler);
+        }
+    }
+    function get_params() {
+        var hash = location.search.substring(1), params = {}, parts, i, part, key;
+        if (hash) {
+            parts = hash.split('&');
+            for (i = 0; i < parts.length; i++) {
+                part = parts[i].split('=');
+                key = decodeURIComponent(part[0]);
+                params[key] = decodeURIComponent(part.slice(1).join('='));
+            }
+        }
+        return params;
+    }
+
+    function text(str) {
+        if (typeof str != 'string') return str;
+        if (!str) return str;
+        return str.replace(re_html_escape, function (chr) {
+            return html_escapes[chr] || chr;
+        });
+    }
+    function get_icon(_name) {
+        var icon;
+        try {
+            icon = get_suffix(_name);
+            icon = switch_type(icon);
+            var type_map = ["doc", "xls", "ppt",  "pdf", "txt", "avi", "apk", "3gp", "mov", "mp3", "rmvb", "mp4", "html", "apk", "exe", "jpg", "rar", "7z", "zip"];
+            for (var i in type_map) {
+                if (type_map[i] === icon) {
+                    return icon;
+                }
+            }
+            return 'file';
+        } catch (e) {
+            return 'file';
+        }
+    }
+
+    function get_suffix(_name) {
+        var EXT_REX = /\.([^\.]+)$/;
+        var m = (_name || '').match(EXT_REX);
+        return m ? m[1].toLowerCase() : null;
+    }
+
+    function switch_type(type) {
+        type = type.toLowerCase();
+        type = type.replace(/wps|rtf|docx|docm|dot[xm]?/g, "doc");
+        type = type.replace(/pptx|ptm/g, "ppt");
+        type = type.replace(/xls[xm]?|xl[tx|tm|am|sb]+/g, "xls");
+        type = type.replace(/bmp|tiff|exif|raw|jpg|jpeg|png|gif'/g, "jpg");
+        type = type.replace(/text/g, "txt");
+        type = type.replace(/swf|fla/g, "flv");
+        type = type.replace(/wma|wav|ogg|acc|m4a|wave|midi|ape|aac|aiff|mid|xmf|amr|flac|rttl/g, "mp3");
+        type = type.replace(/audio|wmv|wma|mkv|mpe|rm|mpeg|f4a|dat|mpg/g, "mp4");
+        type = type.replace(/html|htm/g, "html");
+        type = type.replace(/tar|jar|gz/g, "zip");
+        return type;
+    }
+
+    function smart_sub(str, len, exceed_tail) {
+        try {
+            var index = 0;
+            len *= 2;
+            exceed_tail = typeof exceed_tail === 'string' ? exceed_tail : '..';
+            // 截断符长度
+            var tail_length = exceed_tail.length;
+            // 如果字串被截断，除去截断符后能显示的长度
+            var exceed_max_length = len - tail_length;
+            // 如果达到截断后的最大长度，记录字符位置，以便后面真要截断时快速判断
+            var exceed_max_charindex;
+
+            for (var i = 0, l = str.length; i < l; i++) {
+                if (/[^\x00-\xFF]/.test(str.charAt(i))) {
+                    index += 2;
+                } else {
+                    index++;
+                }
+                if(!exceed_max_charindex && index >= exceed_max_length){
+                    exceed_max_charindex = i+1;
+                }
+                if (index > len) { // 要进行截断了
+                    return ( str.substr(0, exceed_max_charindex) + exceed_tail );
+                }
+            }
+            return str;
+        }
+        catch (e) {
+            return str;
+        }
+    }
+
+    function get_readsize(bytes, decimal_digits) {
+        var BYTE_UNITS = ['B', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y', 'D', 'N', '...'];
+        bytes = parseInt(bytes);
+        decimal_digits = parseInt(decimal_digits);
+        decimal_digits = decimal_digits >= 0 ? decimal_digits : 1;
+        if (!bytes)
+            return '0B';
+        var unit = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+        var size = bytes / Math.pow(1024, unit);
+        var decimal_mag = Math.pow(10, decimal_digits); // 2位小数 -> 100，3位小数 -> 1000
+        var decimal_size = Math.round(size * decimal_mag) / decimal_mag;  // 12.345 -> 12.35
+        var int_size = parseInt(decimal_size);
+        var result = decimal_size !== int_size ? decimal_size : int_size; // 如果没有小数位，就显示为整数（如1.00->1)
+        return result + BYTE_UNITS[unit];
+    }
+
+    function $(id) {
+        return document.getElementById(id);
+    }
+    var extend = function(ori, dest) {
+        for(var o in dest) {
+            ori[o] = dest[o];
+        }
+        return ori;
+    };
+
+    var toQueryString = function(json) {
+        var arr = [];
+        for(var o in json) {
+            arr.push(encodeURIComponent(o) + '=' + encodeURIComponent(json[o]));
+        }
+        return arr.join('&');
+    }
+
+    var request = function(){
+        var defaultOpt = {
+            url: 'default.fcg',
+            method: 'GET',
+            data: null,
+            success: function() {},
+            error: function() {},
+            timeout: 30 * 1000
+        };
+        //只实现GET请求
+        return function(opt) {
+            opt = extend(defaultOpt, opt);
+            opt.method = opt.method.toUpperCase();
+            var url = '';
+            if(opt.method === 'POST') {
+                url = opt.url;
+            } else {
+                url = opt.data ? opt.url + toQueryString(opt.data) + '&' : opt.url;
+            }
+            var xhr = new XMLHttpRequest();
+            var aborted = false;
+            var xhrTimer = setTimeout(function() {
+                aborted = true;
+                xhr.abort();
+                xhr = null;
+            }, opt.timeout);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4 || aborted) {
+                    if (!aborted && ((xhr.status >= 200 && xhr.status < 300 ) || xhr.status == 304)) { //检查aborted属性是否超时
+                        var code = 0,
+                            errMsg = '',
+                            errDesc = '';
+                        if(opt.method === 'GET') {
+                            code = parseInt(xhr.getResponseHeader('User-ReturnCode'), 10);
+                            errMsg = xhr.getResponseHeader('User-ReturnMsg') || '';
+                        }
+                        var isSuccsess = code === 0;
+                        var result;
+                        try {
+                            result = JSON.parse(xhr.responseText);
+                        } catch(e) {
+                            isSuccsess = false;
+                            errDesc = e.message;
+                        }
+                        if(isSuccsess) {
+                            opt.success(result);
+                        } else {
+                            opt.error({
+                                code: code === 0 ? LOCALERROR.PARSEERR['code'] : code,//parse result error
+                                msg: errMsg,
+                                desc: errDesc
+                            });
+                        }
+                        //超时或主动abort
+                    } else {
+                        opt.error({
+                            code: xhr.status || LOCALERROR.NETERR['code'],
+                            msg: LOCALERROR.NETERR['msg'],
+                            desc: xhr.statusText
+                        });
+                    }
+                    xhr = null;
+                    clearTimeout(xhrTimer);
+                }
+            }
+            xhr.open(opt.method, url, true);
+            xhr.send(opt.data);
+            return {
+                abort: function() {
+                    xhr.abort();
+                    xhr = null;
+                    clearTimeout(xhrTimer);
+                }
+            };
+        }
+
+    }();
+
+    window.onload = function() {
+        var params = get_params();
+        init({
+            domain: location.hostname,
+            port: location.port,
+            downloadkey: params['rkey'],
+            fileType: params['filetype'],
+            fileSize: params['filesize'],
+            fileName: params['filename'],
+            isAppbox: params['is_appbox'],
+            curPath: params['path']
+        });
+    }
+
+</script>
+
+</body></html>

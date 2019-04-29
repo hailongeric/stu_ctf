@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<!-- saved from url=(0032)https://share.weiyun.com/58G5R4G -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style id="stndz-style"></style>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+    
+    <title>文件分享</title>
+    <meta name="Keywords" content="QQ, 腾讯,微云, 分享, 网盘, 网络硬盘, U盘, 云存储, 传输, 存储, 同步, 备份, 拍照, 上传, 下载, 中转, 文件, 照片, 相册, 离线, 传文件, wifi, cloud, 微云网页版, weiyun, weiyun web">
+    <meta name="Description" content="微云是腾讯公司为用户精心打造的一项智能云服务, 您可以通过微云方便地在手机和电脑之间同步文件、推送照片和传输数据。">    <link rel="shortcut icon" href="https://img.weiyun.com/vipstyle/nr/box/img/favicon.ico?max_age=31536000" type="image/x-icon">
+    <script src="./文件分享_files/stats.js.download" name="MTAH5" sid="500496724" cid="500496745"></script><script type="text/javascript">
+        window.g_start_time = +new Date()
+    </script>                                                <link rel="stylesheet" href="./文件分享_files/page-share.css">                                                <link rel="stylesheet" href="./文件分享_files/page-share-delay.css">                
+<style type="text/css">
+    .mod-media-code .mod-form{
+        width:auto
+    }
+    .mod-media-code .mod-card .card-bd{
+        width: 220px;
+        margin: 0 auto;
+    }
+    .mod-media-code .mod-media .mod-form-s{
+        width:auto
+    }
+    .mod-media-code .mod-card-s .mod-form .form-bd{
+        box-shadow: 0 0 0;
+        padding: 0;
+        margin: 0;
+        background: none;
+    }
+    .mod-media-code .mod-form .mod-form-item{
+        padding-top:30px
+    }
+    .mod-media-code .mod-form-item .input-txt{
+        height: 36px;
+        line-height: 36px;
+        width: 100%;
+        box-sizing: border-box;
+        padding:0 5px;
+    }
+    .mod-media-code .mod-form .form-item{
+        text-align:center
+    }
+    .mod-media-code .mod-form .btn-l{
+        width:100%
+    }
+    .page-ad .mod-media-doc .media-bd {
+        min-height: calc(100vh - 64px - 64px - 150px);
+    }
+</style>
+                <script>
+        window.g_css_time = +new Date()
+        document.domain = location.hostname.indexOf('weiyun.com') > -1 ? 'weiyun.com' : location.hostname.split('.').slice(1).join('.')
+    </script>        <script data-content="habo">
+    (function() {
+        var ua = navigator.userAgent || '';
+        var qzoneArray = /Qzone\/(\S+)/.exec(ua),
+            qqArray = /V\S+_\S+_\S+_\S+_\S+_\S+_\S+/.exec(ua),
+            weiyunArray = /Weiyun\/(\S+)/.exec(ua);
+        var apnArray = /NetType\/(\S+)/.exec(ua);
+        var uinArray = /uin=o0*(\S+);/.exec(document.cookie || '');
+        var pathArray = /^\/[^\/]+?\/[^\/]+/.exec(location.pathname || '');
+
+        var qua = qzoneArray && qzoneArray[1] || qqArray && qqArray[0] || weiyunArray && weiyunArray[1] || '';
+        var apn = apnArray && apnArray[1];
+        var uin = uinArray && uinArray[1];
+
+        var collector = [],
+            collectorTime = 2000,//2000ms时间间隔内的请求合并上报
+            collectorTimer;
+        window.reportHaboGlobal = function(code, appid, command) {
+            command = command || '';
+            if (command[0] === '/') {
+                command = 'hybrid' + command + (pathArray && pathArray[0]);;
+            }
+
+            var data = {
+                releaseversion: qua,
+                apn: apn,
+                touin: uin,
+                key: 'appid,commandid,resultcode'
+            };
+            collector.push([appid || '1000361', command, code]);
+            var url = 'https://h5.qzone.qq.com/wspeed.qq.com/w.cgi';
+
+            collectorTimer && clearTimeout(collectorTimer);
+            collectorTimer = setTimeout(report, collectorTime);
+            function report() {
+                var params = [];
+                for (var key in data) {
+                    if (data.hasOwnProperty(key)) {
+                        params.push(key + '=' + encodeURIComponent(data[key]));
+                    }
+                }
+                if (collector && collector.length) {
+                    var i = 0;
+                    while (collector.length) {
+                        if (params.join('&').length > 1000) {
+                            break;
+                        }
+                        var c = collector.shift();
+                        params.push([i + 1, 1].join('_') + '=' + c[0]);
+                        params.push([i + 1, 2].join('_') + '=' + c[1]);
+                        params.push([i + 1, 3].join('_') + '=' + c[2]);
+                        i++;
+                    }
+                }
+                params.push('rv=' + Math.random());
+                new Image().src = url + '?' + params.join('&');
+                i > 0 && collector.length && setTimeout(report, 1000);
+            }
+        };
+    })();
+</script>        <script>
+    window.__js_error_command__ = 'web/share';
+</script><script data-content="jserror">
+    (function() {
+        var toUrlParam = function(data) {
+            var arr = [];
+            for (var key in data) {
+                if (data.hasOwnProperty(key)) {
+                    if(data[key] !== '' && data[key] !== undefined) {
+                        arr.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
+                    }
+                }
+            }
+            return arr.join('&');
+        };
+        var getCommand = function(host, pathname) {
+        return window.__js_error_command__ || 'weiyun'
+    };
+        var send = function(data, callback, onTimeout) {
+            try {
+                onTimeout && setTimeout(function() {
+                    callback = null;
+                    onTimeout && onTimeout();
+                }, 3000);
+                data = toUrlParam(data);
+                var url = 'https://h5.qzone.qq.com/log/post/script/error/' + command;
+                var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : {};
+                if ('withCredentials' in xhr) {
+                    xhr.open('post', url, true);
+                    xhr.withCredentials = true;
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                    xhr.onreadystatechange = function(){
+                        if (xhr.readyState == 4 && xhr.status == 200) {
+                            var o = JSON.parse(xhr.responseText);
+                            onTimeout = null;
+                            callback && callback(o);
+                        }
+                    };
+                    try{xhr.send(data);}catch(e){};
+                } else if ('XDomainRequest' in window) {
+                    var xdr = new XDomainRequest();
+                    xdr.open('post', url);
+                    xdr.onload = function() {
+                        var o;
+                        window.JSON ? (o = JSON.parse(xdr.responseText)) : eval('o = ' + xdr.responseText);
+                        onTimeout = null;
+                        callback && callback(o);
+                    };
+                    setTimeout(function() {
+                        try{xdr.send(data);}catch(e){};
+                    }, 0);
+                }
+            } catch(e) {}
+        };
+        var appid = '1000417',
+            maxJsErrorCount = parseInt(''),
+            maxJsErrorCount = isNaN(maxJsErrorCount) ? 5 : maxJsErrorCount,
+            jsErrorCount = 0,
+            command = getCommand(location.host, location.pathname),
+            reportHabo = 1,
+            queue = [],
+            isReporting = false,
+            hasReportPv = false;        var report = function() {
+            var data = queue.shift();
+            if (!data) {
+                isReporting = false;
+                return;
+            }
+            isReporting = true;
+            data.reportHabo = reportHabo;
+            reportHabo = 0;
+            send(data, function(o) {
+                if (o && o.code == 0 && o.data && o.data.result != 1) {
+                    reportHabo = data.reportHabo;
+                }
+                setTimeout(report, 1000);
+            }, function() {
+                report();
+            });
+        };
+        window.reportJsError = function(data) {
+            reportPv();
+            if (jsErrorCount++ >= maxJsErrorCount) {return;}
+            queue.push(data);
+            !isReporting && report();
+        };
+        var onError = function(event) {
+            var data = {
+                appid: appid,
+                error: event.message,
+                stack: event.error && event.error.stack || '',
+                url: location.href,
+                scriptUrl: event.filename,
+                lineNumber: event.lineno,
+                columnNumber: event.colno
+            };
+            var fn = window.beforeJsErrorReport;
+            if (typeof fn === 'function' && false === fn(data)) {
+                return;
+            }
+            window.reportJsError(data);
+        };
+        var reportPv = function() {
+            if (hasReportPv) {return;}
+            window.reportHaboGlobal && reportHaboGlobal(0, appid, command);
+            hasReportPv = true;
+        };
+        if (window.addEventListener) {
+            window.addEventListener('error', onError);
+            window.addEventListener('load', reportPv);
+        } else if (window.attachEvent) {
+            window.attachEvent('onerror', onError);
+            window.attachEvent('onload', reportPv);
+        } else {
+            window.onerror = onError;
+            setTimeout(reportPv, 3000);
+        }
+        window.listenError = true;
+    })();
+</script>         <script>        window.__dev__   = false;
+        window.__debug__ = false;
+        window.__alpha__ = false;
+    </script>
+</head>
+<body class="page-share page-ad"><div id="app"><div class="layout-wrapper"><div class="layout-header"><div class="layout-header-inner"><div class="mod-nav clearfix"><div class="logo"><a href="https://www.weiyun.com/?from=share">腾讯微云</a></div> <div class="nav-group"><div class="nav-group-item"><a href="https://www.weiyun.com/disk?from=share" class="nav-group-item-link">查看我的微云</a></div></div> <div class="mod-action-wrap-list"></div> <div class="mod-act-group"><div class="act-item act-item-acc"><div class="act-item-txt"><div class="mod-user"><div class="user-info"><span class="name">登录</span></div></div></div></div></div></div></div></div> <div class="layout-body"><div class="layout-body-inner"><div class="layout-main-wrap"><div class="layout-main"><div class="layout-main-hd"><div class="mod-act-panel"><div class="act-panel-inner clearfix"><!----> <div class="mod-action-wrap-list"><div class="mod-action-wrap mod-action-wrap-c mod-action-wrap-code clearfix"><div title="二维码" class="action-item"><div class="action-item-con"><i class="icon icon-code"></i> <span class="act-txt">二维码</span> <div class="mod-bubble-menu with-border"><div class="mod-code"><div class="code-pic"><img src="./文件分享_files/qrcode.php" alt="二维码"></div> <div class="code-info"><p class="tit">扫描二维码在手机上查看</p></div></div></div></div></div></div> <!----> <div class="mod-action-wrap mod-action-wrap-menu clearfix"><div class="action-item"><div class="action-item"><div class="action-item-con"><i class="icon icon-download"></i> <span class="act-txt">下载</span></div></div></div></div> <div class="mod-action-wrap mod-action-wrap-a mod-action-wrap-upload clearfix"><div class="action-item"><div class="action-item"><div class="action-item-con"><i class="icon icon-save"></i> <span class="act-txt">保存微云</span></div></div></div></div> <!----></div> <div class="mod-breadcrumb"><ul class="breadcrumb clearfix"><li class="item all cur"><a href="javascript:void(0)"><i class="icon"></i>i春秋KRLab-技术支持的分享</a></li> </ul></div></div></div></div> <div class="layout-main-bd"><div class="layout-main-bd-con"><div class="layout-main-bd-wrap"><div class="mod-list-group mod-list-group-files mod-list-group-files-share"><div class="list-group-hd"><div class="list-group-tit-wrap"><div class="list-group-tit name checked dis"><span class="mod-check act"><i class="icon icon-check-s icon-checkbox"></i> <span class="check-info">已选择
+                        <b class="check-info-num">1</b>项</span></span> <span class="tit-con">名称<i class="icon"></i></span> <!----></div><div class="list-group-tit time cur dis hide"><!----> <span class="tit-con">上次修改时间<i class="icon icon-sort"></i></span> <!----></div><div class="list-group-tit size dis hide"><!----> <span class="tit-con">大小<i class="icon"></i></span> <!----></div></div><div class="mod-action-wrap mod-action-wrap-c mod-action-wrap-d  mod-action-wrap-mode clearfix" style="display: none;"><div class="action-item act"><div class="action-item-con"><i class="icon icon-mode-list"></i> <span class="act-txt">列表</span></div></div> <div class="action-item"><div class="action-item-con"><i class="icon icon-mode-thumb"></i> <span class="act-txt">缩略图</span></div></div></div></div> <div tabindex="0" class="list-group-bd" selectbox-id="1" scroll-bottom-id="1"><div class="list-group-wrapper"><ul class="list-group"><li class="list-group-item checked act"><div class="item-inner"><div class="item-tit"><div class="label"><i class="icon icon-check-s icon-checkbox"></i></div> <div class="thumb"><!----> <!----> <i class="icon icon-m icon-zip-m"></i></div> <div class="info"><a href="javascript:void(0)" title="puzzles_4bd8ba4b08cf59d558f6b366d44e222e.zip" class="tit">puzzles_4bd8ba4b08cf59d558f6b366d44e222e.zip</a> <!----></div></div> <div class="item-info"><span class="item-info-list"><span class="txt txt-time">今天 08:54</span></span> <span class="item-info-list"><span class="txt txt-size">10.4 KB</span></span> <!----></div></div></li></ul></div> <div class="mod-loadmore" style="display: none;"><i class="icon icon-load-bullet-left"></i> <i class="icon icon-load-bullet"></i> <i class="icon icon-load-bullet-right"></i></div> <div class="list-group-info"><p class="info-con">共<b class="count">1</b>项 </p></div></div></div></div></div> <div class="layout-footer"><div class="layout-footer-inner"><div class="mod-footer"><div class="footer-cont"><div class="copyright"><p class="copyright-link"><a href="http://www.tencent.com/" target="_blank">关于腾讯</a> |
+                        <a href="https://www.weiyun.com/xy.html" target="_blank">服务条款</a> |
+                        <a href="http://kf.qq.com/" target="_blank">客服中心</a> | 粤B2-20090059-86号
+                    </p> <p class="copyright-info">版权声明：您应尊重相关作品著作权人合法权益，未经著作权人合法授权，不能违法上传、存储、分享他人作品</p> <p class="copyright-email"><a href="https://www.weiyun.com/complaint.html" target="_blank">侵权投诉指引</a> | 举报或投诉：
+                        <a href="mailto:notice-b2@tencent.com" class="email">notice-b2@tencent.com</a></p> <p class="copyright-txt">
+                        Copyright©1998-2019 Tencent. All Rights Reserved.
+                        <span class="txt-ass">腾讯公司 版权所有</span></p></div> <div class="mod-element"><div class="element-hd"><p class="hd-tit">软件下载</p></div> <div class="element-bd"><div class="element-list"><div class="element-list-pic"><i class="icon icon-win"></i></div> <div class="element-list-info"><p class="tit">Windows版</p></div></div> <div class="element-list"><div class="element-list-pic"><i class="icon icon-mac-m"></i></div> <div class="element-list-info"><p class="tit">Mac版</p></div></div> <div class="element-list"><div class="element-list-pic"><i class="icon icon-phone"></i></div> <div class="element-list-info"><p class="tit">手机版</p></div></div></div></div></div></div></div></div></div></div> <div class="layout-sider-bar"><div class="mod-ad"><div class="ad-bd"><div class="ad-pic"><a href="javascript:void(0)"><img alt="" src="./文件分享_files/1546501531831_262921.png" class="pic"></a></div></div></div> <div class="mod-pattern"><div class="pattern-inner"><div class="pattern-hd"><div title="关闭" class="hd-close"><i class="icon icon-close"></i></div></div> <div class="pattern-bd"><a href="javascript:void(0)"><img alt="" src="./文件分享_files/1551442822183_603076.png" class="pic"></a></div></div></div></div></div></div></div> <!----></div></div><script>
+    (function () {
+        var queue = [];
+        var isRetry = false;            var hostname = '//img.weiyun.com';
+        window['webpackJsonp'] = function hijackWebpackJsonp(chunkIds, moreModules, executeModules) {
+            if (window['webpackJsonp'] !== hijackWebpackJsonp)
+                return
+
+            queue.push([
+                chunkIds,
+                moreModules,
+                executeModules
+            ]);
+
+            if (!isRetry) {
+                isRetry = true;
+
+                var script = document.createElement('script');
+
+                script.onload = function () {
+                    if (window['webpackJsonp'] == hijackWebpackJsonp)
+                        return
+                    
+                    for (var i = 0; i < queue.length; i++) {
+                        webpackJsonp.apply(null, queue[i]);
+                    }
+                };
+                script.type = 'text/javascript';
+                script.charset = 'utf-8';
+                script.async = true;
+                script.timeout = 120000;
+                script.src = hostname + '/club/weiyun/wy/dist/share/web/manifest.min.js?_t=' + Date.now();
+
+                document.getElementsByTagName('head')[0].appendChild(script);
+            }
+        }
+    })()
+</script><script>
+    window.syncData = {"shareInfo":{"share_uin":null,"down_cnt":0,"view_cnt":1,"store_cnt":null,"res_type":0,"share_name":"puzzles_4bd8ba4b08cf59d558f6b366d44e222e.zip","create_time":1555721757,"pdir_key":"39a72493e2db71ab22a40dc955c150d0","file_list":[{"file_id":"82f3a23e-6150-4c3e-aebb-dfba1e2cb2a6","file_name":"puzzles_4bd8ba4b08cf59d558f6b366d44e222e.zip","file_size":10652,"thumb_url":null,"pdir_key":"39a72493e2db71ab22a40dc955c150d0","long_time":null,"video_thumb":null,"https_thumb_url":null,"lib_id":null,"file_mtime":1555721664246,"weiyun_team_dir_info":{},"file_ext_info":{"dev_mac":null,"dev_show_type":null,"dev_type":null,"dev_name":null,"dev_os":null,"app_name":null,"take_dev_type":null,"backup_flag":null,"thumb_url":null,"cookie_name":null,"cookie_value":null,"ext_status":null,"take_time":null,"longitude":null,"latitude":null,"group_id":null,"from_source":null,"width":0,"height":0,"org_file_size":null,"org_file_sha":null,"orientation":null,"singer":null,"album":null,"music_detail_info":{},"upload_appid":null,"origin_pic_sha":null,"creater_uin":null,"creater_nickname":null,"deleter_uin":null,"deleter_nickname":null,"deleter_pdir_key":null,"buss_type":null,"long_time":null,"history_ctime":null,"last_ver_file_size":null,"star_flag":null,"star_time":null,"event_id":null,"weiyun_host":null,"weiyun_port":null,"can_accel":null,"tplink_key":null,"batch_id":null,"number":null,"total_num":null,"upload_uin":null,"album_owner_uin":null,"comment_count":null,"like_count":null,"upload_uid":null,"album_owner_uid":null,"upload_nickname":null,"comment_user_logo":[],"upload_logo":null,"download_url":null,"play_url":null,"pic_quality_info":{},"event_id_list":[],"label":null,"file_upload_type":null,"poi_name":null,"app_data":null,"upload_ipaddr":null,"client_version":null,"copy_ipaddr":null,"copy_appid":null,"copy_src_uin":null,"upload_time":null,"copy_time":null,"tencent_docs_info":{},"is_tencent_docs":false,"overwrite":null,"saver_uin":null,"flag":null,"https_url":null,"is_live_photo":null,"album_md5":null,"ower_info":{},"file_attr_ctime":null,"file_attr_mtime":null,"inbox_key":null}}],"dir_list":[],"share_key":"58G5R4G","short_url":"https://share.weiyun.com/58G5R4G","safe_type":null,"virus_desc":null,"virus_name":null,"share_flag":11,"item":{},"need_pwd":null,"html_content":null,"resource_list":[],"collection":{},"thumb_url":null,"pwd":"","remain_time":-1,"resource_type":0,"store_appid":0,"share_nick_name":"i春秋KRLab-技术支持","share_head_image_url":"http://thirdqq.qlogo.cn/g?b=sdk&k=UYpB6Y29J2sTXPJxNTf69w&s=640&t=1552111505","share_type":11,"group_code":0,"is_editable":false,"weiyun_vip_flag":0,"weiyun_vip_img_url":"http://qzonestyle.gtimg.cn/qz-proj/wy-src/img/vip-v2/vip_0_off_.png","https_weiyun_vip_img_url":"https://qzonestyle.gtimg.cn/qz-proj/wy-src/img/vip-v2/vip_0_off_.png","is_share_owner":false,"note_list":[],"server_page_context":"0,1,0,1","finish_flag":true,"total_dir_count":0,"total_file_count":1,"is_all_pic_video":false,"already_join":null,"nickname_list":[],"album_owner_nickname":null,"album_owner_logo":null,"share_dir_join_user_list":[],"share_user_id":null,"album_owner_user_id":null,"is_dir_encryption":null,"team_flag":false,"team_uin":0,"share_watermark_flag":false,"team_name":"","weiyun_share_auth_info":{},"total_note_count":0,"last_save_path":[],"file_item_list":[],"upload_cnt":null,"file_size":null,"file_suffix":null,"share_icon":"zip","is_all_pic":false,"is_all_video":false}};
+</script><script>
+    window.g_domready_time = +new Date()
+</script>                                <script src="./文件分享_files/manifest.min.js.download" crossorigin="anonymous"></script>                                <script src="./文件分享_files/vendor.min.js.download" crossorigin="anonymous"></script>                                <script src="./文件分享_files/app.min.js.download" crossorigin="anonymous"></script>    <script>
+    window.g_js_time = +new Date()
+</script>
+
+<div class="modal modal-show"><b class="modal-mask"></b> <div id="_wy_compress_previewer" class="modal-dialog pop-zip-preview-wrapper"><button aria-label="关闭弹窗" class="btn-icon icon icon-pop-close"></button> <iframe frameborder="0" src="./文件分享_files/compress_file_previewer.html" style="width: 800px; height: 830px; z-index: -1; position: absolute; top: 0px; left: 0px;"></iframe></div></div></body></html>
